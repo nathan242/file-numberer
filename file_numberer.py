@@ -188,6 +188,9 @@ def error_dialog(message):
     dialog.addButton("ok_button", "OK", sys.exit)
     dialog.mainloop()
 
+def file_label(index, name):
+    return "["+str(index)+"] "+name
+
 def move(item, direction):
     index = files.index(item)
     other_index = index + direction
@@ -202,7 +205,9 @@ def move(item, direction):
     other_item = win.elements["frame_file_"+other_item_name]
 
     item.grid(row = other_index)
+    win.editLabel("file_label_"+item_name, file_label(other_index, item_name))
     other_item.grid(row = index)
+    win.editLabel("file_label_"+other_item_name, file_label(index, other_item_name))
 
     files[index] = other_item_name
     files[other_index] = item_name
@@ -266,7 +271,7 @@ win.addScrollbar("scrollbar")
 for index, item in enumerate(files):
     item_basename = os.path.basename(item)
     win.startFrame("file_"+item)
-    win.addLabel("file_label_"+item, "["+str(index)+"] "+item_basename, padx=100, pady=10)
+    win.addLabel("file_label_"+item, file_label(index, item_basename), padx=100, pady=10)
     win.addButton("up_"+item, "UP", lambda item=item: move(item, -1))
     win.addButton("down_"+item, "DOWN", lambda item=item: move(item, 1))
     win.endFrame()
