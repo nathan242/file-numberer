@@ -189,7 +189,7 @@ def error_dialog(message):
     dialog.mainloop()
 
 def file_label(index, name):
-    return "["+str(index)+"] "+name
+    return "["+str(index)+"] "+os.path.basename(name)
 
 def move(item, direction):
     index = files.index(item)
@@ -223,18 +223,20 @@ def confirm_rename():
             start = None
 
         if isinstance(start, int):
-            do_rename(start)
+            do_rename(start, confirm.getEntryValue("prefix"))
             sys.exit()
 
     confirm = Window("Confirm Rename?")
     confirm.setResizable(False, False)
+    confirm.addLabel("prefix", "Prefix:", 1)
+    confirm.addEntry("prefix")
     confirm.addLabel("start_number", "Start at number:", 1)
     confirm.addEntry("start_number")
     confirm.addButton("rename_ok", "OK", confirm_ok, 1, ipadx=45)
     confirm.addButton("rename_cancel", "CANCEL", confirm_cancel, ipadx=30)
     confirm.mainloop()
 
-def do_rename(start=0):
+def do_rename(start=0, prefix=""):
     renames = {}
     for item in files:
         if not os.path.exists(item):
@@ -242,7 +244,7 @@ def do_rename(start=0):
 
         path = os.path.dirname(item)
         parts = os.path.basename(item).split(".")
-        dest = os.path.join(path, str(start)+"."+parts[len(parts)-1])
+        dest = os.path.join(path, prefix+str(start)+"."+parts[len(parts)-1])
 
         if os.path.exists(dest):
             error_dialog("File "+dest+" already exists")
@@ -269,9 +271,8 @@ win.setResizable(False, True)
 win.addScrollbar("scrollbar")
 
 for index, item in enumerate(files):
-    item_basename = os.path.basename(item)
     win.startFrame("file_"+item)
-    win.addLabel("file_label_"+item, file_label(index, item_basename), padx=100, pady=10)
+    win.addLabel("file_label_"+item, file_label(index, item), padx=100, pady=10)
     win.addButton("up_"+item, "UP", lambda item=item: move(item, -1))
     win.addButton("down_"+item, "DOWN", lambda item=item: move(item, 1))
     win.endFrame()
