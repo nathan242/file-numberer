@@ -170,7 +170,7 @@ class Window:
         scrollbar = tkinter.Scrollbar(self.root, orient="vertical", command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
-        canvas.pack()
+        canvas.pack(fill="both", expand=True)
         frame = tkinter.Frame(canvas)
         canvas.create_window((0,0), window=frame, anchor="nw")
         frame.bind("<Configure>", lambda event, canvas=canvas : canvas.configure(scrollregion=canvas.bbox("all")))
