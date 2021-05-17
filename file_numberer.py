@@ -238,7 +238,9 @@ def confirm_rename():
 
 def do_rename(start=0, prefix=""):
     renames = {}
+    secondary_renames = {}
     for item in files:
+        # Check if source file exists
         if not os.path.exists(item):
             error_dialog("File "+item+" does not exist")
 
@@ -246,13 +248,26 @@ def do_rename(start=0, prefix=""):
         parts = os.path.basename(item).split(".")
         dest = os.path.join(path, prefix+str(start)+"."+parts[len(parts)-1])
 
+        # Check if a file with the destination filename already exists
         if os.path.exists(dest):
-            error_dialog("File "+dest+" already exists")
+            if dest in files:
+                tmp_dest = dest+'.file_numberer'
+                if os.path.exists(tmp_dest):
+                    error_dialog("File "+tmp_dest+" already exists")
+
+                secondary_renames[tmp_dest] = dest
+                dest = tmp_dest
+            else:
+                error_dialog("File "+dest+" already exists")
 
         renames[item] = dest
         start += 1
 
-    for src, dst in renames.items():
+    rename_files(renames.items())
+    rename_files(secondary_renames.items())
+
+def rename_files(items):
+    for src, dst in items:
         print(src+" -> "+dst)
 
         try:
