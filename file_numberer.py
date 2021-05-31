@@ -289,9 +289,11 @@ win.addScrollbar("scrollbar")
 
 for index, item in enumerate(files):
     win.startFrame("file_"+item)
-    win.addLabel("file_label_"+item, file_label(index, item), padx=100, pady=10)
-    win.addButton("up_"+item, "UP", lambda item=item: move(item, -1))
-    win.addButton("down_"+item, "DOWN", lambda item=item: move(item, 1))
+    win.addLabel("file_label_"+item, file_label(index, item), 1, padx=100, pady=10)
+    win.startFrame("file_buttons_"+item)
+    win.addButton("up_"+item, "↑", lambda item=item: move(item, -1))
+    win.addButton("down_"+item, "↓", lambda item=item: move(item, 1))
+    win.endFrame()
     win.endFrame()
 
 win.addButton("rename", "RENAME", confirm_rename, pady=20)
