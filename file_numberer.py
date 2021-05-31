@@ -223,20 +223,22 @@ def confirm_rename():
             start = None
 
         if isinstance(start, int):
-            do_rename(start, confirm.getEntryValue("prefix"))
+            do_rename(start, confirm.getEntryValue("prefix"), confirm.getEntryValue("suffix"))
             sys.exit()
 
     confirm = Window("Confirm Rename?")
     confirm.setResizable(False, False)
     confirm.addLabel("prefix", "Prefix:", 1)
     confirm.addEntry("prefix")
+    confirm.addLabel("suffix", "Suffix:", 1)
+    confirm.addEntry("suffix")
     confirm.addLabel("start_number", "Start at number:", 1)
     confirm.addEntry("start_number")
     confirm.addButton("rename_ok", "OK", confirm_ok, 1, ipadx=45)
     confirm.addButton("rename_cancel", "CANCEL", confirm_cancel, ipadx=30)
     confirm.mainloop()
 
-def do_rename(start=0, prefix=""):
+def do_rename(start=0, prefix="", suffix=""):
     renames = {}
     secondary_renames = {}
     for item in files:
@@ -246,7 +248,7 @@ def do_rename(start=0, prefix=""):
 
         path = os.path.dirname(item)
         parts = os.path.basename(item).split(".")
-        dest = os.path.join(path, prefix+str(start)+"."+parts[len(parts)-1])
+        dest = os.path.join(path, prefix+str(start)+suffix+"."+parts[len(parts)-1])
 
         # Check if a file with the destination filename already exists
         if os.path.exists(dest):
