@@ -3,15 +3,20 @@
 import sys
 import os
 import tkinter
+import getopt
 
 """
 Window class
 Manages tkinter GUI elements
 """
 class Window:
-    def __init__(self, windowTitle):
+    def __init__(self, windowTitle, windowGeometry=None):
         self.rootWin = tkinter.Tk()
         self.rootWin.title(windowTitle)
+
+        if windowGeometry is not None:
+            self.rootWin.geometry(windowGeometry)
+
         self.root = self.rootWin
         self.roots = []
         self.elements = {}
@@ -56,6 +61,12 @@ class Window:
     def setMainWindow(self, state):
         if state == True:
             self.rootWin.protocol("WM_DELETE_WINDOW", sys.exit)
+
+    def getRootWindow(self):
+        return self.rootWin
+
+    def getCurrentRoot(self):
+        return self.root
 
     def rowWeight(self, row, weight):
         self.root.rowconfigure(row, weight=weight)
@@ -146,6 +157,19 @@ class Window:
     def getEntryValue(self, name):
         if "entry_"+name in self.elements:
             return self.elements["entry_"+name].get()
+
+    def addImage(self, name, filename, width, height, move=0, anchor=tkinter.NW):
+        self.elements["image_"+name] = tkinter.Canvas(self.root, width=width, height=height)
+        self.elements["image_"+name].grid(row=self.gridY, column=self.gridX)
+
+        try:
+            image = ImageTk.PhotoImage(Image.open(filename).resize((width, height)))
+            self.elements["image_object_"+name] = image
+            self.elements["image_"+name].create_image(0, 0, anchor=anchor, image=image)
+        except:
+            pass
+
+        self.nextPos(move)
 
     def addTimer(self, time, action):
         return self.rootWin.after(time, action)
@@ -277,23 +301,67 @@ def rename_files(items):
         except:
             error_dialog("Cannot rename "+src+" to "+dst)
 
-files = sys.argv[1:]
+def help():
+    print("File Numberer - Utility to order and rename files by number")
+    print("Usage: "+sys.argv[0]+" [-h] [-p] [-x PREVIEW RES X] [-y PREVIEW RES Y] FILES...")
+    print(" -h                Show this help.")
+    print(" -p                Enable preview of image files.")
+    print(" -x PREVIEW RES X  Image preview size X")
+    print(" -y PREVIEW RES Y  Image preview size Y")
+    print("")
+
+show_preview = False
+preview_x = 50
+preview_y = 50
+
+try:
+    optlist, args = getopt.getopt(sys.argv[1:], "hpx:y:")
+except getopt.GetoptError as err:
+    sys.stderr.write(str(err)+"\n")
+    help()
+    sys.exit(1)
+
+for o, a in optlist:
+    if o == "-h":
+        help()
+        sys.exit(0)
+    elif o == "-p":
+        show_preview = True
+    elif o == "-x":
+        preview_x = int(a)
+    elif o == "-y":
+        preview_y = int(a)
+
+if show_preview:
+    try:
+        from PIL import ImageTk, Image
+    except:
+        sys.stderr.write("Cannot load PIL. Disabling image previews.\n")
+        show_preview = False
+
+files = args
 
 if len(files) == 0:
     error_dialog("No input files")
 
-win = Window("File Numberer")
+win = Window("File Numberer", "800x600")
 win.setMainWindow(True)
-win.setResizable(False, True)
 win.addScrollbar("scrollbar")
 
 for index, item in enumerate(files):
     win.startFrame("file_"+item)
     win.addLabel("file_label_"+item, file_label(index, item), 1, padx=100, pady=10)
-    win.startFrame("file_buttons_"+item)
+
+    win.startFrame("file_buttons_"+item, move=1)
     win.addButton("up_"+item, "↑", lambda item=item: move(item, -1))
     win.addButton("down_"+item, "↓", lambda item=item: move(item, 1))
     win.endFrame()
+
+    if show_preview:
+        win.startFrame("file_preview_"+item)
+        win.addImage("file_image_"+item, item, preview_x, preview_y)
+        win.endFrame()
+
     win.endFrame()
 
 win.addButton("rename", "RENAME", confirm_rename, pady=20)
