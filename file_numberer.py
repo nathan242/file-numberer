@@ -274,9 +274,14 @@ def do_rename(start=0, prefix="", suffix=""):
         parts = os.path.basename(item).split(".")
         dest = os.path.join(path, prefix+str(start)+suffix+"."+parts[len(parts)-1])
 
+        dest_comp = dest
+        if case_insensitive:
+            # Lowercase the destination filename for comparison
+            dest_comp = dest.lower()
+
         # Check if a file with the destination filename already exists
         if os.path.exists(dest):
-            if dest in files:
+            if dest_comp in files:
                 tmp_dest = dest+'.file_numberer'
                 if os.path.exists(tmp_dest):
                     error_dialog("File "+tmp_dest+" already exists")
@@ -303,19 +308,21 @@ def rename_files(items):
 
 def help():
     print("File Numberer - Utility to order and rename files by number")
-    print("Usage: "+sys.argv[0]+" [-h] [-p] [-x PREVIEW RES X] [-y PREVIEW RES Y] FILES...")
-    print(" -h                Show this help.")
-    print(" -p                Enable preview of image files.")
+    print("Usage: "+sys.argv[0]+" [-h] [-p] [-x PREVIEW RES X] [-y PREVIEW RES Y] [-i] FILES...")
+    print(" -h                Show this help")
+    print(" -p                Enable preview of image files")
     print(" -x PREVIEW RES X  Image preview size X")
     print(" -y PREVIEW RES Y  Image preview size Y")
+    print(" -i                Case insensitive mode")
     print("")
 
 show_preview = False
 preview_x = 50
 preview_y = 50
+case_insensitive = False
 
 try:
-    optlist, args = getopt.getopt(sys.argv[1:], "hpx:y:")
+    optlist, args = getopt.getopt(sys.argv[1:], "hpx:y:i")
 except getopt.GetoptError as err:
     sys.stderr.write(str(err)+"\n")
     help()
@@ -331,6 +338,8 @@ for o, a in optlist:
         preview_x = int(a)
     elif o == "-y":
         preview_y = int(a)
+    elif o == "-i":
+        case_insensitive = True
 
 if show_preview:
     try:
@@ -340,6 +349,11 @@ if show_preview:
         show_preview = False
 
 files = args
+
+if case_insensitive:
+    # Lowercase all input filenames
+    for item in range(len(files)):
+        files[item] = files[item].lower()
 
 if len(files) == 0:
     error_dialog("No input files")
