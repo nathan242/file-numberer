@@ -205,6 +205,12 @@ class Window:
 
         self.__setRoot(frame)
 
+    def withdraw(self):
+        self.rootWin.withdraw()
+
+    def deiconify(self):
+        self.rootWin.deiconify()
+
 
 def error_dialog(message):
     dialog = Window("Error")
@@ -239,8 +245,11 @@ def move(item, direction):
 def confirm_rename():
     def confirm_cancel():
         confirm.close()
+        win.deiconify()
 
     def confirm_ok():
+        confirm.withdraw()
+
         try:
             start = int(confirm.getEntryValue("start_number"))
         except:
@@ -249,6 +258,10 @@ def confirm_rename():
         if isinstance(start, int):
             do_rename(start, confirm.getEntryValue("prefix"), confirm.getEntryValue("suffix"))
             sys.exit()
+        else:
+            confirm.deiconify()
+
+    win.withdraw()
 
     confirm = Window("Confirm Rename?")
     confirm.setResizable(False, False)
