@@ -158,6 +158,11 @@ class Window:
         if "entry_"+name in self.elements:
             return self.elements["entry_"+name].get()
 
+    def setEntryValue(self, name, value):
+        if "entry_"+name in self.elements:
+            self.elements["entry_"+name].delete(0, tkinter.END)
+            self.elements["entry_"+name].insert(0, value)
+
     def addImage(self, name, filename, width, height, move=0, anchor=tkinter.NW):
         self.elements["image_"+name] = tkinter.Canvas(self.root, width=width, height=height)
         self.elements["image_"+name].grid(row=self.gridY, column=self.gridX)
@@ -256,7 +261,7 @@ def confirm_rename():
             start = None
 
         if isinstance(start, int):
-            do_rename(start, confirm.getEntryValue("prefix"), confirm.getEntryValue("suffix"))
+            do_rename(start, confirm.getEntryValue("pattern"))
             sys.exit()
         else:
             confirm.deiconify()
@@ -265,17 +270,19 @@ def confirm_rename():
 
     confirm = Window("Confirm Rename?")
     confirm.setResizable(False, False)
-    confirm.addLabel("prefix", "Prefix:", 1)
-    confirm.addEntry("prefix")
-    confirm.addLabel("suffix", "Suffix:", 1)
-    confirm.addEntry("suffix")
+    confirm.addLabel("pattern_help", "{n} = Number, {o} = Original file name")
+    confirm.startFrame("confirm_params")
+    confirm.addLabel("pattern", "Pattern:", 1)
+    confirm.addEntry("pattern")
+    confirm.setEntryValue("pattern", "{n}")
     confirm.addLabel("start_number", "Start at number:", 1)
     confirm.addEntry("start_number")
     confirm.addButton("rename_ok", "OK", confirm_ok, 1, ipadx=45)
     confirm.addButton("rename_cancel", "CANCEL", confirm_cancel, ipadx=30)
+    confirm.endFrame()
     confirm.mainloop()
 
-def do_rename(start=0, prefix="", suffix=""):
+def do_rename(start=0, pattern="{n}"):
     renames = {}
     secondary_renames = {}
     for item in files:
@@ -285,7 +292,9 @@ def do_rename(start=0, prefix="", suffix=""):
 
         path = os.path.dirname(item)
         parts = os.path.basename(item).split(".")
-        dest = os.path.join(path, prefix+str(start)+suffix+"."+parts[len(parts)-1])
+        original_name = ''.join(parts[:-1])
+        dest_name = pattern.replace("{o}", original_name).replace("{n}", str(start))
+        dest = os.path.join(path, dest_name+"."+parts[len(parts)-1])
 
         dest_comp = dest
         if case_insensitive:
