@@ -283,6 +283,9 @@ def confirm_rename():
     confirm.mainloop()
 
 def do_rename(start=0, pattern="{n}"):
+    if "{n}" not in pattern:
+        error_dialog("Pattern does not contain file number")
+
     renames = {}
     secondary_renames = {}
     for item in files:
