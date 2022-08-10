@@ -168,9 +168,12 @@ class Window:
         self.elements["image_"+name].grid(row=self.gridY, column=self.gridX)
 
         try:
-            image = ImageTk.PhotoImage(Image.open(filename).resize((width, height)))
+            image_obj = Image.open(filename)
+            image_obj.thumbnail((width, height))
+            image_size = image_obj.size
+            image = ImageTk.PhotoImage(image_obj)
             self.elements["image_object_"+name] = image
-            self.elements["image_"+name].create_image(0, 0, anchor=anchor, image=image)
+            self.elements["image_"+name].create_image((width-image_size[0])/2, (height-image_size[1])/2, anchor=anchor, image=image)
         except:
             pass
 
