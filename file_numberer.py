@@ -258,13 +258,18 @@ def confirm_rename():
     def confirm_ok():
         confirm.withdraw()
 
-        try:
-            start = int(confirm.getEntryValue("start_number"))
-        except:
-            start = None
+        pattern = confirm.getEntryValue("pattern")
+
+        if "{n}" in pattern:
+            try:
+                start = int(confirm.getEntryValue("start_number"))
+            except:
+                start = None
+        else:
+            start = 0
 
         if isinstance(start, int):
-            do_rename(start, confirm.getEntryValue("pattern"))
+            do_rename(start, pattern)
             sys.exit()
         else:
             confirm.deiconify()
@@ -286,8 +291,11 @@ def confirm_rename():
     confirm.mainloop()
 
 def do_rename(start=0, pattern="{n}"):
-    if "{n}" not in pattern:
-        error_dialog("Pattern does not contain file number")
+    if "{n}" not in pattern and "{o}" not in pattern:
+        error_dialog("Pattern does not contain at least the file number or original file name")
+
+    if pattern == "{o}":
+        error_dialog("Pattern has no effect")
 
     renames = {}
     secondary_renames = {}
@@ -328,6 +336,12 @@ def do_rename(start=0, pattern="{n}"):
 def rename_files(items):
     for src, dst in items:
         print(src+" -> "+dst)
+
+        if not os.path.exists(src):
+            error_dialog("Source file does not exist: "+src)
+
+        if os.path.exists(dst):
+            error_dialog("Destination file already exists: "+dst)
 
         try:
             os.rename(src, dst)
