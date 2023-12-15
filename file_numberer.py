@@ -57,10 +57,13 @@ class Window:
 
     def setResizable(self, x, y):
         self.rootWin.resizable(x, y)
-            
+
     def setMainWindow(self, state):
         if state == True:
             self.rootWin.protocol("WM_DELETE_WINDOW", sys.exit)
+
+    def setCloseAction(self, action):
+        self.rootWin.protocol("WM_DELETE_WINDOW", action)
 
     def getRootWindow(self):
         return self.rootWin
@@ -224,7 +227,9 @@ def error_dialog(message):
     dialog = Window("Error")
     dialog.addLabel("error_message", message)
     dialog.addButton("ok_button", "OK", sys.exit)
+    dialog.setCloseAction(sys.exit)
     dialog.mainloop()
+    sys.exit()
 
 def file_label(index, name):
     return "["+str(index)+"] "+os.path.basename(name)
@@ -287,6 +292,7 @@ def confirm_rename():
     confirm.addEntry("start_number")
     confirm.addButton("rename_ok", "OK", confirm_ok, 1, ipadx=45)
     confirm.addButton("rename_cancel", "CANCEL", confirm_cancel, ipadx=30)
+    confirm.setCloseAction(confirm_cancel)
     confirm.endFrame()
     confirm.mainloop()
 
